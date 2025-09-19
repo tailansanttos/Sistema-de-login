@@ -8,11 +8,14 @@ import com.tailan.auth.application.model.domain.User;
 import com.tailan.auth.application.model.enums.UserRole;
 import com.tailan.auth.application.model.repositories.UserRepository;
 import com.tailan.auth.application.service.UserAuthService;
+import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserAuthServiceImpl implements UserAuthService {
@@ -30,11 +33,14 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     @Override
+    @Transactional
     public void registerUser(UserRegister userRegister) {
-        User user = userRepository.findByEmail(userRegister.email()).get();
-        if (user !=null){
-            throw  new IllegalArgumentException("Email already exists");
+        Optional<User> existingUser = userRepository.findByEmail(userRegister.email());
+        if (existingUser.isPresent()) {
+            throw new IllegalStateException("User already exists");
         }
+
+        User user = new User();
         String passwordHash = securityConfiguration.passwordEncoder().encode(userRegister.password());
 
         user.setEmail(userRegister.email());
