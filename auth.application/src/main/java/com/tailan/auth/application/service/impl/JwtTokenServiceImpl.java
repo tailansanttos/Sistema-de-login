@@ -9,13 +9,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Date;
 
 @Service
 public class JwtTokenServiceImpl {
     @Value("${SECRET_KEY}")
-    private static String SECRET_KEY;
+    private String SECRET_KEY;
     @Value("${JWT_ISSUER}")
-    private static String JWT_ISSUER;
+    private String JWT_ISSUER;
 
     public String generateToken(UserDetails userDetails) {
         try {
@@ -35,10 +36,10 @@ public class JwtTokenServiceImpl {
         try {
             Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
             return JWT.require(algorithm)
-                    .withIssuer(JWT_ISSUER) //DEFINE O EMISSOR DO TOKEN
+                    .withIssuer(JWT_ISSUER)
                     .build()
-                    .verify(token) //VERIFICA A VALIDADE DO TOKEN
-                    .getSubject(); //PEGA O ASSUNTO DO TOKEN, NO CASO O EMAIL DO USUARIO DO TOKEN.
+                    .verify(token)
+                    .getSubject();
         }catch (JWTVerificationException exception){
             throw new JWTVerificationException("Token inválido ou expirado.", exception);
         }
